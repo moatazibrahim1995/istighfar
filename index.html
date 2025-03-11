@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HEMO Istighfar Counter</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        .counter { margin: 20px; font-size: 24px; }
+        .button { font-size: 20px; padding: 10px 20px; margin: 10px; cursor: pointer; }
+        .progress-bar { width: 100%; background: #eee; border-radius: 10px; margin: 10px 0; }
+        .progress { height: 20px; background: green; width: 0%; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <h1>HEMO Istighfar Counter</h1>
+    <p>Daily Target: <span id="target">2000</span></p>
+    <div>
+        <h2>Moataz</h2>
+        <div class="progress-bar"><div id="userProgress" class="progress"></div></div>
+        <p class="counter">Count: <span id="userCount">0</span></p>
+        <button class="button" onclick="increment('user')">+1</button>
+    </div>
+    <div>
+        <h2>Heba</h2>
+        <div class="progress-bar"><div id="wifeProgress" class="progress"></div></div>
+        <p class="counter">Count: <span id="wifeCount">0</span></p>
+        <button class="button" onclick="increment('wife')">+1</button>
+    </div>
+    <p>Streak: <span id="streak">0</span> days</p>
+    <button class="button" onclick="resetCounts()">Reset for Next Day</button>
+    <script>
+        let userCount = parseInt(localStorage.getItem('userCount')) || 0;
+        let wifeCount = parseInt(localStorage.getItem('wifeCount')) || 0;
+        let target = 1000;
+        let streak = parseInt(localStorage.getItem('streak')) || 0;
+
+        document.getElementById("userCount").textContent = userCount;
+        document.getElementById("wifeCount").textContent = wifeCount;
+        document.getElementById("streak").textContent = streak;
+
+        function updateProgress() {
+            document.getElementById("userProgress").style.width = (userCount / target * 100) + "%";
+            document.getElementById("wifeProgress").style.width = (wifeCount / target * 100) + "%";
+        }
+
+        function increment(user) {
+            if (user === "user") {
+                userCount++;
+                document.getElementById("userCount").textContent = userCount;
+            } else {
+                wifeCount++;
+                document.getElementById("wifeCount").textContent = wifeCount;
+            }
+            localStorage.setItem("userCount", userCount);
+            localStorage.setItem("wifeCount", wifeCount);
+            updateProgress();
+        }
+
+        function resetCounts() {
+            if (userCount >= target && wifeCount >= target) {
+                streak++;
+            } else {
+                streak = 0;
+            }
+            userCount = 0;
+            wifeCount = 0;
+            localStorage.setItem("userCount", userCount);
+            localStorage.setItem("wifeCount", wifeCount);
+            localStorage.setItem("streak", streak);
+            document.getElementById("userCount").textContent = userCount;
+            document.getElementById("wifeCount").textContent = wifeCount;
+            document.getElementById("streak").textContent = streak;
+            updateProgress();
+        }
+        updateProgress();
+    </script>
+</body>
+</html>
