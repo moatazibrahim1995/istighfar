@@ -14,76 +14,89 @@
 </head>
 <body>
     <h1>HEMO Istighfar Counter</h1>
-    <p>Daily Target: <span id="target">1000</span></p>
-    
+    <p>Daily Target: <span id="target">2000</span></p>
     <div>
         <h2>Moataz</h2>
         <div class="progress-bar"><div id="userProgress" class="progress"></div></div>
         <p class="counter">Count: <span id="userCount">0</span></p>
         <button class="button" onclick="increment('user')">+1</button>
     </div>
-    
     <div>
         <h2>Heba</h2>
         <div class="progress-bar"><div id="wifeProgress" class="progress"></div></div>
         <p class="counter">Count: <span id="wifeCount">0</span></p>
         <button class="button" onclick="increment('wife')">+1</button>
     </div>
-
     <p>Streak: <span id="streak">0</span> days</p>
     <button class="button" onclick="resetCounts()">Reset for Next Day</button>
 
     <script>
-        const BIN_ID = "67d194908960c979a5702757";  // Your JSONBin ID
-        const API_KEY = "$2a$10$h/NqnvvzO0nK.DP0qgshSOf6zGJmNCOdsIMn6KM.59Woue4Y5M6qi"; // Your JSONBin API Key
-        const JSON_BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+        const API_KEY = "$2a$10$ez9pMZB7hRZCANf67rAJJugaObPEIEZJBS/p.UdN4pyC9MW2vytEu"; // Your JSONBin API Key
+        const BIN_ID = "67d194908960c979a5702757"; // Your JSONBin ID
+        const URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
-        let userCount = 0, wifeCount = 0, streak = 0, target = 1000;
+        let userCount = 0;
+        let wifeCount = 0;
+        let streak = 0;
+        const target = 2000; // Daily target for both
 
+        // Fetch initial data from JSONBin
         async function fetchData() {
-            try {
-                let response = await fetch(JSON_BIN_URL, {
-                    headers: { "X-Master-Key": API_KEY }
-                });
-                let data = await response.json();
+            const response = await fetch(URL, {
+                method: 'GET',
+                headers: {
+                    "X-Master-Key": API_KEY
+                }
+            });
+            const data = await response.json();
+            if (data && data.record) {
                 userCount = data.record.userCount || 0;
                 wifeCount = data.record.wifeCount || 0;
                 streak = data.record.streak || 0;
-                updateUI();
-            } catch (error) {
-                console.error("Error fetching data:", error);
             }
+            updateUI();
         }
 
-        async function updateData() {
-            try {
-                let data = { userCount, wifeCount, streak };
-                await fetch(JSON_BIN_URL, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Master-Key": API_KEY
-                    },
-                    body: JSON.stringify(data)
-                });
-            } catch (error) {
-                console.error("Error updating data:", error);
-            }
+        // Update the progress bars and counts
+        function updateUI() {
+            document.getElementById("userCount").textContent = userCount;
+            document.getElementById("wifeCount").textContent = wifeCount;
+            document.getElementById("streak").textContent = streak;
+
+            document.getElementById("userProgress").style.width = (userCount / target * 100) + "%";
+            document.getElementById("wifeProgress").style.width = (wifeCount / target * 100) + "%";
         }
 
-        function increment(user) {
+        // Increment the user's or wife's count
+        async function increment(user) {
             if (user === "user") {
                 userCount++;
-                document.getElementById("userCount").textContent = userCount;
             } else {
                 wifeCount++;
-                document.getElementById("wifeCount").textContent = wifeCount;
             }
-            updateProgress();
-            updateData();
+            await saveData();
+            updateUI();
         }
 
-        function resetCounts() {
+        // Save the data to JSONBin
+        async function saveData() {
+            const data = {
+                userCount: userCount,
+                wifeCount: wifeCount,
+                streak: streak
+            };
+            await fetch(URL, {
+                method: 'PUT',
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Master-Key": API_KEY
+                },
+                body: JSON.stringify({ record: data })
+            });
+        }
+
+        // Reset the counts at the end of the day
+        async function resetCounts() {
             if (userCount >= target && wifeCount >= target) {
                 streak++;
             } else {
@@ -91,22 +104,11 @@
             }
             userCount = 0;
             wifeCount = 0;
-            updateProgress();
-            updateData();
+            await saveData();
+            updateUI();
         }
 
-        function updateProgress() {
-            document.getElementById("userProgress").style.width = (userCount / target * 100) + "%";
-            document.getElementById("wifeProgress").style.width = (wifeCount / target * 100) + "%";
-        }
-
-        function updateUI() {
-            document.getElementById("userCount").textContent = userCount;
-            document.getElementById("wifeCount").textContent = wifeCount;
-            document.getElementById("streak").textContent = streak;
-            updateProgress();
-        }
-
+        // Initialize the app
         fetchData();
     </script>
 </body>
