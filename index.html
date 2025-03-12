@@ -31,6 +31,7 @@
     <button class="button" onclick="resetCounts()">Reset for Next Day</button>
 
     <script>
+        console.log("Script Loaded"); // Check if script loads
         const API_KEY = "$2a$10$ez9pMZB7hRZCANf67rAJJugaObPEIEZJBS/p.UdN4pyC9MW2vytEu"; // Your JSONBin API Key
         const BIN_ID = "67d194908960c979a5702757"; // Your JSONBin ID
         const URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
@@ -42,6 +43,7 @@
 
         // Fetch initial data from JSONBin
         async function fetchData() {
+            console.log("Fetching data..."); // Check if fetch is called
             try {
                 const response = await fetch(URL, {
                     method: 'GET',
@@ -49,6 +51,12 @@
                         "X-Master-Key": API_KEY
                     }
                 });
+
+                if (!response.ok) {
+                    console.error("Error fetching data:", response.status);
+                    return;
+                }
+
                 const data = await response.json();
                 console.log("Fetched data:", data); // Log fetched data for debugging
                 if (data && data.record) {
@@ -74,6 +82,7 @@
 
         // Increment the user's or wife's count
         async function increment(user) {
+            console.log("Incrementing count for:", user); // Log the user for debugging
             if (user === "user") {
                 userCount++;
             } else {
@@ -100,6 +109,12 @@
                     },
                     body: JSON.stringify({ record: data })
                 });
+
+                if (!response.ok) {
+                    console.error("Error saving data:", response.status);
+                    return;
+                }
+
                 const result = await response.json();
                 console.log("Saved data:", result); // Log saved data response
             } catch (error) {
