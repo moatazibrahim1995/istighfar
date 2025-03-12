@@ -42,19 +42,24 @@
 
         // Fetch initial data from JSONBin
         async function fetchData() {
-            const response = await fetch(URL, {
-                method: 'GET',
-                headers: {
-                    "X-Master-Key": API_KEY
+            try {
+                const response = await fetch(URL, {
+                    method: 'GET',
+                    headers: {
+                        "X-Master-Key": API_KEY
+                    }
+                });
+                const data = await response.json();
+                console.log("Fetched data:", data); // Log fetched data for debugging
+                if (data && data.record) {
+                    userCount = data.record.userCount || 0;
+                    wifeCount = data.record.wifeCount || 0;
+                    streak = data.record.streak || 0;
                 }
-            });
-            const data = await response.json();
-            if (data && data.record) {
-                userCount = data.record.userCount || 0;
-                wifeCount = data.record.wifeCount || 0;
-                streak = data.record.streak || 0;
+                updateUI();
+            } catch (error) {
+                console.error("Error fetching data:", error); // Log errors if fetching fails
             }
-            updateUI();
         }
 
         // Update the progress bars and counts
@@ -74,6 +79,7 @@
             } else {
                 wifeCount++;
             }
+            console.log("Updated counts:", userCount, wifeCount); // Log incremented counts
             await saveData();
             updateUI();
         }
@@ -85,14 +91,20 @@
                 wifeCount: wifeCount,
                 streak: streak
             };
-            await fetch(URL, {
-                method: 'PUT',
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Master-Key": API_KEY
-                },
-                body: JSON.stringify({ record: data })
-            });
+            try {
+                const response = await fetch(URL, {
+                    method: 'PUT',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Master-Key": API_KEY
+                    },
+                    body: JSON.stringify({ record: data })
+                });
+                const result = await response.json();
+                console.log("Saved data:", result); // Log saved data response
+            } catch (error) {
+                console.error("Error saving data:", error); // Log errors if saving fails
+            }
         }
 
         // Reset the counts at the end of the day
@@ -104,6 +116,7 @@
             }
             userCount = 0;
             wifeCount = 0;
+            console.log("Counts reset:", userCount, wifeCount, streak); // Log reset values
             await saveData();
             updateUI();
         }
